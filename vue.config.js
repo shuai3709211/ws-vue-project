@@ -11,7 +11,7 @@ module.exports = {
     sourceMap: false,
     loaderOptions: {
       scss: {
-        // prependData: `@import "~@/styles/variables.scss";`
+        prependData: `@import "~@/styles/index.scss";`
       }
     }
   },

@@ -1,32 +1,76 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view />
+  <div id="app" :style="styles">
+    <router-view></router-view>
+    <my-spin :spinShow="$store.state.loading"></my-spin>
   </div>
 </template>
+<script>
+import MySpin from "@@/mySpin";
+import { mapMutations } from "vuex";
+import resizeCallback from "@/utils/resizeCallback";
+import menus from "@/router/routes";
+import { getRouters } from "@/router/layzLoading";
+export default {
+  name: "App",
+  components: { MySpin },
+  created() {
+    const handler = () => {
+      this.changeContainerSize({
+        width: document.documentElement.clientWidth,
+        height: document.documentElement.clientHeight
+      });
+    };
+    handler();
+    window.onresize = resizeCallback(handler);
 
-<style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+    menus[0].children = [...menus[0].children];
 
-#nav {
-  padding: 30px;
+    this.$router.addRoutes(menus);
+  },
+  computed: {
+    menuList() {
+      return this.$store.state.menuList;
+    },
+    token() {
+      return this.$store.state.token;
+    },
+    styles() {
+      return {
+        width: this.$store.state.size.width + "px",
+        height: this.$store.state.size.height + "px"
+      };
+    }
+  },
+  watch: {
+    menuList() {
+      this.init();
+    },
+    token(v) {
+      console.log(v);
+      // if (v) {
+      //   this.authUserInfo();
+      // }
+    }
+  },
+  methods: {
+    ...mapMutations(["changeContainerSize"]),
+    init() {
+      /* 注册菜单页面路由 以及  功能点页面路由 */
+      let functionMenes = this.$store.state.functions
+        ? this.$store.state.functions.filter(o => o.component)
+        : [];
 
-  a {
-    font-weight: bold;
-    color: #2c3e50;
+      let routeArr = getRouters([...this.menuList, ...functionMenes]);
 
-    &.router-link-exact-active {
-      color: #42b983;
+      menus[0].children = [...menus[0].children, ...routeArr];
+
+      this.$router.addRoutes(menus);
+      this.$store.commit("updatedMenuFirsts", menus[0].children);
     }
   }
-}
+};
+</script>
+
+<style lang="scss">
+@import "./styles/index.scss";
 </style>
