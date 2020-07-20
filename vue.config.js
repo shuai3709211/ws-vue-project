@@ -36,7 +36,6 @@ module.exports = {
 
   chainWebpack: config => {
     config.entry("main").add("babel-polyfill"); // main是入口js文件
-
     config.resolve.alias
       .set("@", resolve("src"))
       .set("@@", resolve("src/components"))
@@ -45,11 +44,11 @@ module.exports = {
   },
 
   devServer: {
-    // proxy,
     host: "0.0.0.0",
     port: 9548, // 端口号
     https: false, // https:{type:Boolean}
-    open: true // 配置自动启动浏览器
+    open: true, // 配置自动启动浏览器
+    before: require("./mock/mock-server.js")
   },
   configureWebpack: config => {
     if (process.env.NODE_ENV === "production") {
